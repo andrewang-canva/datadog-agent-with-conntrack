@@ -483,10 +483,12 @@ func (r *HTTPReceiver) handleTraces(v Version, w http.ResponseWriter, req *http.
 	atomic.AddInt64(&ts.TracesBytes, req.Body.(*LimitedReader).Count)
 	atomic.AddInt64(&ts.PayloadAccepted, 1)
 
+	cid := req.Header.Get(headerContainerID)
 	payload := &Payload{
 		Source:                 ts,
 		Traces:                 traces,
-		ContainerTags:          getContainerTags(req.Header.Get(headerContainerID)),
+		ContainerID:            cid,
+		ContainerTags:          getContainerTags(cid),
 		ClientComputedTopLevel: req.Header.Get(headerComputedTopLevel) != "",
 		ClientComputedStats:    req.Header.Get(headerComputedStats) != "",
 		ClientDroppedP0s:       droppedTracesFromHeader(req.Header, ts),
@@ -533,6 +535,10 @@ type Payload struct {
 	// language, interpreter, tracer version, etc.
 	Source *info.TagStats
 
+	// ContainerID specifies the container ID from where this payload originated, as
+	// and if sent by the client.
+	ContainerID string
+
 	// ContainerTags specifies orchestrator tags corresponding to the origin of this
 	// trace (e.g. K8S pod, Docker image, ECS, etc). They are of the type "k1:v1,k2:v2".
 	ContainerTags string
@@ -547,6 +553,7 @@ type Payload struct {
 	// ClientComputedStats reports whether the client has computed and sent over stats
 	// so that the agent doesn't have to.
 	ClientComputedStats bool
+
 	// ClientDroppedP0s specifies the number of P0 traces chunks dropped by the client.
 	ClientDroppedP0s int64
 }
