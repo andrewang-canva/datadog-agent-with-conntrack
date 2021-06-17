@@ -11,6 +11,7 @@ import (
 	"os"
 	"syscall"
 	"testing"
+	"time"
 
 	"github.com/DataDog/datadog-agent/pkg/security/rules"
 )
@@ -26,7 +27,7 @@ func TestChown(t *testing.T) {
 		Expression: `chown.file.path == "{{.Root}}/test-symlink" && chown.file.destination.uid in [100, 101, 102, 103] && chown.file.destination.gid in [200, 201, 202, 203]`,
 	}
 
-	test, err := newTestModule(nil, []*rules.RuleDefinition{ruleDef, ruleDef2}, testOpts{})
+	test, err := newTestModule(t, nil, []*rules.RuleDefinition{ruleDef, ruleDef2}, testOpts{})
 	if err != nil {
 		t.Fatal(err)
 	}
