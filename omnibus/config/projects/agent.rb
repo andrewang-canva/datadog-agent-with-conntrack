@@ -175,6 +175,7 @@ end
 if linux?
   dependency 'procps-ng'
   dependency 'curl'
+  dependency 'conntrack'
 end
 
 # creates required build directories
